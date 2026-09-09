@@ -1,1 +1,17 @@
-/* Canon Keeper 样式文件 */
+.canon-keeper-settings textarea {
+    width: 100%;
+    resize: vertical;
+    margin-top: 5px;
+    margin-bottom: 10px;
+}
+
+#canon_keeper_save {
+    margin-top: 10px;
+    margin-bottom: 8px;
+}
+
+#canon_keeper_status {
+    display: block;
+    opacity: 0.7;
+    margin-top: 5px;
+}
