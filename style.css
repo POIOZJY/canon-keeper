@@ -1,17 +1,111 @@
-.canon-keeper-settings textarea {
+.canon-keeper-settings {
     width: 100%;
-    resize: vertical;
-    margin-top: 5px;
-    margin-bottom: 10px;
 }
 
-#canon_keeper_save {
+.canon-keeper-settings .inline-drawer-content {
+    padding-bottom: 12px;
+}
+
+.canon-keeper-section {
+    width: 100%;
+    box-sizing: border-box;
+}
+
+.canon-keeper-section h4 {
     margin-top: 10px;
     margin-bottom: 8px;
 }
 
-#canon_keeper_status {
+.canon-keeper-description {
+    margin-top: 4px;
+    margin-bottom: 12px;
+    opacity: 0.8;
+    line-height: 1.5;
+}
+
+.canon-keeper-settings label {
     display: block;
-    opacity: 0.7;
-    margin-top: 5px;
+    margin-top: 10px;
+    margin-bottom: 5px;
+}
+
+.canon-keeper-settings textarea {
+    display: block;
+    width: 100%;
+    box-sizing: border-box;
+    resize: vertical;
+    margin-bottom: 12px;
+}
+
+.canon-keeper-settings input[type="text"],
+.canon-keeper-settings input[type="password"] {
+    display: block;
+    width: 100%;
+    box-sizing: border-box;
+    margin-bottom: 10px;
+}
+
+.canon-keeper-button {
+    display: block !important;
+    width: 100% !important;
+    min-width: 100% !important;
+    box-sizing: border-box;
+    margin-top: 12px;
+    margin-bottom: 8px;
+    text-align: center;
+    white-space: normal;
+}
+
+.canon-keeper-status {
+    display: block;
+    margin-top: 7px;
+    margin-bottom: 7px;
+    opacity: 0.75;
+}
+
+.canon-keeper-checkbox-row {
+    display: flex !important;
+    align-items: center;
+    gap: 8px;
+    margin-top: 10px;
+    margin-bottom: 12px;
+}
+
+.canon-keeper-checkbox-row input {
+    width: auto !important;
+    margin: 0 !important;
+}
+
+.canon-keeper-key-row {
+    display: flex;
+    align-items: stretch;
+    gap: 6px;
+    width: 100%;
+}
+
+.canon-keeper-key-row input {
+    flex: 1;
+    min-width: 0;
+    margin-bottom: 10px !important;
+}
+
+.canon-keeper-small-button {
+    flex: 0 0 auto;
+    min-width: 54px;
+    margin-bottom: 10px;
+}
+
+.canon-keeper-notice {
+    margin-top: 12px;
+    padding: 10px;
+    border: 1px solid var(--SmartThemeBorderColor);
+    border-radius: 6px;
+    opacity: 0.8;
+    line-height: 1.5;
+}
+
+.canon-keeper-settings hr {
+    margin-top: 18px;
+    margin-bottom: 18px;
+    opacity: 0.4;
 }
