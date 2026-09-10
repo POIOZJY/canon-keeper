@@ -3,7 +3,7 @@
 }
 
 .canon-keeper-settings .inline-drawer-content {
-    padding-bottom: 12px;
+    padding-bottom: 14px;
 }
 
 .canon-keeper-section {
@@ -11,38 +11,43 @@
     box-sizing: border-box;
 }
 
+.canon-keeper-section + .canon-keeper-section {
+    margin-top: 18px;
+}
+
 .canon-keeper-section h4 {
-    margin-top: 10px;
-    margin-bottom: 8px;
+    margin: 8px 0;
 }
 
 .canon-keeper-description {
-    margin-top: 4px;
-    margin-bottom: 12px;
-    opacity: 0.8;
+    margin: 4px 0 12px;
+    opacity: 0.82;
     line-height: 1.5;
 }
 
 .canon-keeper-settings label {
     display: block;
-    margin-top: 10px;
-    margin-bottom: 5px;
+    margin: 11px 0 5px;
 }
 
-.canon-keeper-settings textarea {
-    display: block;
-    width: 100%;
-    box-sizing: border-box;
-    resize: vertical;
-    margin-bottom: 12px;
-}
-
+.canon-keeper-settings textarea,
 .canon-keeper-settings input[type="text"],
+.canon-keeper-settings input[type="url"],
+.canon-keeper-settings input[type="number"],
 .canon-keeper-settings input[type="password"] {
     display: block;
     width: 100%;
+    min-width: 0;
     box-sizing: border-box;
-    margin-bottom: 10px;
+}
+
+.canon-keeper-settings textarea {
+    resize: vertical;
+}
+
+.canon-keeper-panel {
+    padding-top: 12px;
+    border-top: 1px solid var(--SmartThemeBorderColor);
 }
 
 .canon-keeper-button {
@@ -50,62 +55,121 @@
     width: 100% !important;
     min-width: 100% !important;
     box-sizing: border-box;
-    margin-top: 12px;
-    margin-bottom: 8px;
-    text-align: center;
+    margin: 12px 0 8px;
     white-space: normal;
-}
-
-.canon-keeper-status {
-    display: block;
-    margin-top: 7px;
-    margin-bottom: 7px;
-    opacity: 0.75;
-}
-
-.canon-keeper-checkbox-row {
-    display: flex !important;
-    align-items: center;
-    gap: 8px;
-    margin-top: 10px;
-    margin-bottom: 12px;
-}
-
-.canon-keeper-checkbox-row input {
-    width: auto !important;
-    margin: 0 !important;
 }
 
 .canon-keeper-key-row {
     display: flex;
+    gap: 7px;
     align-items: stretch;
-    gap: 6px;
-    width: 100%;
 }
 
 .canon-keeper-key-row input {
-    flex: 1;
-    min-width: 0;
-    margin-bottom: 10px !important;
+    flex: 1 1 auto;
 }
 
 .canon-keeper-small-button {
     flex: 0 0 auto;
-    min-width: 54px;
-    margin-bottom: 10px;
+    min-width: 58px;
+}
+
+.canon-keeper-check-row {
+    display: flex !important;
+    align-items: center;
+    gap: 8px;
+}
+
+.canon-keeper-check-row input {
+    width: auto !important;
+    margin: 0 !important;
+}
+
+.canon-keeper-status,
+.canon-keeper-metric {
+    display: block;
+    margin-top: 7px;
+    line-height: 1.4;
+    opacity: 0.82;
+}
+
+.canon-keeper-risk,
+.canon-keeper-notice {
+    padding: 10px;
+    border: 1px solid var(--SmartThemeBorderColor);
+    border-radius: 6px;
+    line-height: 1.5;
 }
 
 .canon-keeper-notice {
     margin-top: 12px;
+    opacity: 0.86;
+}
+
+.canon-keeper-prompt-block {
+    margin-top: 12px;
+}
+
+.canon-keeper-prompt-block.is-hidden {
+    display: none;
+}
+
+.canon-keeper-versions {
+    max-height: 620px;
+    overflow-y: auto;
+    padding-right: 2px;
+}
+
+.canon-keeper-version {
+    margin: 10px 0;
     padding: 10px;
     border: 1px solid var(--SmartThemeBorderColor);
     border-radius: 6px;
-    opacity: 0.8;
-    line-height: 1.5;
+    line-height: 1.45;
 }
 
-.canon-keeper-settings hr {
-    margin-top: 18px;
-    margin-bottom: 18px;
-    opacity: 0.4;
+.canon-keeper-version-head {
+    display: flex;
+    gap: 8px;
+    justify-content: space-between;
+    align-items: baseline;
+    margin-bottom: 5px;
+}
+
+.canon-keeper-version-head span,
+.canon-keeper-version small {
+    opacity: 0.76;
+    font-size: 0.86em;
+}
+
+.canon-keeper-version ul {
+    margin: 8px 0;
+    padding-left: 20px;
+}
+
+.canon-keeper-restore {
+    width: 100%;
+    box-sizing: border-box;
+    margin-top: 4px;
+}
+
+.canon-keeper-empty {
+    padding: 10px;
+    opacity: 0.72;
+    text-align: center;
+}
+
+.canon-keeper-status.is-error,
+.canon-keeper-risk.is-error {
+    color: var(--SmartThemeQuoteColor, #e26b6b);
+}
+
+.canon-keeper-status.is-warning,
+.canon-keeper-risk.is-warning {
+    color: var(--SmartThemeEmColor, #d89a39);
+}
+
+.canon-keeper-status.is-success,
+.canon-keeper-risk.is-success {
+    color: var(--SmartThemeQuoteColor, #72ba78);
 }

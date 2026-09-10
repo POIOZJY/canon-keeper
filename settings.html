@@ -6,140 +6,84 @@
         </div>
 
         <div class="inline-drawer-content">
-
             <div class="canon-keeper-section">
-                <h4>当前聊天 Canon</h4>
-
+                <h4>当前世界 Canon</h4>
                 <p class="canon-keeper-description">
-                    以下内容只属于当前聊天。切换聊天后会自动切换到另一个世界的 Canon。
+                    每行是一条“现在仍然有效”的长期世界观事实。这里只属于当前聊天；切换聊天会自动切换到另一个完全独立的世界。
                 </p>
 
-                <label for="canon_keeper_canon">
-                    <b>当前设定</b>
-                </label>
+                <label for="canon_keeper_canon"><b>Canon（当前是什么）</b></label>
+                <textarea id="canon_keeper_canon" class="text_pole" rows="12" placeholder="例如：\n- 伊芙与主角是夫妻。\n- 王都阿斯特拉已被永久摧毁。\n- 新摄政议会统治王国。"></textarea>
+                <small id="canon_keeper_canon_size" class="canon-keeper-metric">0 字符 / ~0 tokens</small>
 
-                <textarea
-                    id="canon_keeper_canon"
-                    class="text_pole"
-                    rows="12"
-                    placeholder="记录这个世界当前真正成立的权威设定。"
-                ></textarea>
+                <label for="canon_keeper_history"><b>History（为什么现在会这样）</b></label>
+                <textarea id="canon_keeper_history" class="text_pole" rows="6" placeholder="仅写理解当前状态必不可少的极简历史原因；不要写剧情摘要。"></textarea>
+                <small id="canon_keeper_history_size" class="canon-keeper-metric">0 字符 / ~0 tokens</small>
 
-                <label for="canon_keeper_history">
-                    <b>历史锚点</b>
-                </label>
-
-                <textarea
-                    id="canon_keeper_history"
-                    class="text_pole"
-                    rows="7"
-                    placeholder="只记录理解当前状态所必需的重要历史。"
-                ></textarea>
-
-                <button
-                    id="canon_keeper_save"
-                    type="button"
-                    class="menu_button canon-keeper-button"
-                >
-                    保存当前聊天设定
-                </button>
-
-                <small id="canon_keeper_status" class="canon-keeper-status">
-                    尚未加载
-                </small>
+                <button id="canon_keeper_save" type="button" class="menu_button canon-keeper-button">保存当前聊天的 Canon 与 History</button>
+                <small id="canon_keeper_status" class="canon-keeper-status">正在加载……</small>
             </div>
 
-            <hr>
-
-            <div class="canon-keeper-section">
-                <h4>独立 AI API</h4>
-
+            <div class="canon-keeper-section canon-keeper-panel">
+                <h4>注入与 Context 安全</h4>
                 <p class="canon-keeper-description">
-                    此 API 以后只负责分析聊天、提出 Canon 修改和维护历史锚点。
-                    它不会替代 SillyTavern 当前用于角色回复的主 API。
+                    Canon Keeper 使用 SillyTavern 可控制的 In-Chat depth 0、System role 注入。它是高优先级上下文参考，但不会伪称能高于模型提供商的 System 或 Developer 指令。
+                </p>
+                <div id="canon_keeper_context_risk" class="canon-keeper-risk">正在计算……</div>
+                <button id="canon_keeper_show_prompt" type="button" class="menu_button canon-keeper-button">查看当前实际注入 Prompt</button>
+                <div id="canon_keeper_prompt_block" class="canon-keeper-prompt-block is-hidden">
+                    <label for="canon_keeper_prompt_preview"><b>实际发送给主模型的 Canon Keeper 内容</b></label>
+                    <textarea id="canon_keeper_prompt_preview" class="text_pole" rows="14" readonly></textarea>
+                    <button id="canon_keeper_copy_prompt" type="button" class="menu_button canon-keeper-button">复制 Prompt</button>
+                </div>
+            </div>
+
+            <div class="canon-keeper-section canon-keeper-panel">
+                <h4>独立 AI API（OpenAI Compatible）</h4>
+                <p class="canon-keeper-description">
+                    此 API 只在角色回复完成后异步判断是否存在长期世界观变化；不会阻塞主聊天回复，也不会替代主聊天 API。未配置时，已保存的 Canon 仍会照常注入。
                 </p>
 
-                <label class="canon-keeper-checkbox-row">
-                    <input
-                        id="canon_keeper_api_enabled"
-                        type="checkbox"
-                    >
+                <label class="canon-keeper-check-row">
+                    <input id="canon_keeper_api_enabled" type="checkbox">
                     <span>启用独立 AI API</span>
                 </label>
-
-                <label for="canon_keeper_api_url">
-                    <b>API 地址</b>
+                <label class="canon-keeper-check-row">
+                    <input id="canon_keeper_automation_enabled" type="checkbox">
+                    <span>角色回复后自动保守维护 Canon</span>
                 </label>
 
-                <input
-                    id="canon_keeper_api_url"
-                    class="text_pole"
-                    type="text"
-                    placeholder="以后在这里填写 OpenAI Compatible API 地址"
-                    autocomplete="off"
-                >
+                <label for="canon_keeper_api_endpoint"><b>API 地址</b></label>
+                <input id="canon_keeper_api_endpoint" class="text_pole" type="url" autocomplete="off" placeholder="https://example.com/v1 或完整的 /chat/completions 地址">
 
-                <label for="canon_keeper_api_key">
-                    <b>API Key</b>
-                </label>
-
+                <label for="canon_keeper_api_key"><b>API Key</b></label>
                 <div class="canon-keeper-key-row">
-                    <input
-                        id="canon_keeper_api_key"
-                        class="text_pole"
-                        type="password"
-                        placeholder="在这里填写 API Key"
-                        autocomplete="off"
-                    >
-
-                    <button
-                        id="canon_keeper_toggle_key"
-                        type="button"
-                        class="menu_button canon-keeper-small-button"
-                    >
-                        显示
-                    </button>
+                    <input id="canon_keeper_api_key" class="text_pole" type="password" autocomplete="off" placeholder="仅保存在本机 SillyTavern 设置中">
+                    <button id="canon_keeper_toggle_key" type="button" class="menu_button canon-keeper-small-button">显示</button>
                 </div>
 
-                <label for="canon_keeper_api_model">
-                    <b>模型名称</b>
-                </label>
+                <label for="canon_keeper_api_model"><b>模型名称</b></label>
+                <input id="canon_keeper_api_model" class="text_pole" type="text" autocomplete="off" placeholder="例如：gpt-4.1-mini">
 
-                <input
-                    id="canon_keeper_api_model"
-                    class="text_pole"
-                    type="text"
-                    placeholder="以后在这里填写模型名称"
-                    autocomplete="off"
-                >
+                <label for="canon_keeper_api_timeout"><b>请求超时（毫秒）</b></label>
+                <input id="canon_keeper_api_timeout" class="text_pole" type="number" min="5000" max="120000" step="1000">
 
-                <button
-                    id="canon_keeper_save_api"
-                    type="button"
-                    class="menu_button canon-keeper-button"
-                >
-                    保存独立 API 设置
-                </button>
-
-                <small id="canon_keeper_api_status" class="canon-keeper-status">
-                    独立 API：未启用
-                </small>
-
+                <button id="canon_keeper_save_api" type="button" class="menu_button canon-keeper-button">保存独立 API 设置</button>
+                <button id="canon_keeper_test_api" type="button" class="menu_button canon-keeper-button">测试连接</button>
+                <button id="canon_keeper_analyze_latest" type="button" class="menu_button canon-keeper-button">立即分析最新角色回复</button>
+                <small id="canon_keeper_api_status" class="canon-keeper-status">独立 API：未启用</small>
                 <div class="canon-keeper-notice">
-                    当前版本只保存独立 API 配置，还不会调用它。
-                    下一阶段才会加入测试连接和 AI 自动维护。
+                    API Key 不会写入 GitHub。部分服务端会阻止浏览器跨域请求；若测试显示 CORS/网络错误，请使用允许浏览器访问的 OpenAI Compatible 地址或相应反向代理。
                 </div>
             </div>
 
-        </div>
-    </div>
-</div>            <div id="canon_keeper_save" class="menu_button">
-                保存
+            <div class="canon-keeper-section canon-keeper-panel">
+                <h4>版本历史与恢复</h4>
+                <p class="canon-keeper-description">
+                    每次手动编辑、AI Patch、来源复核和恢复操作都会留下旧值、新值、理由、来源消息与时间。恢复操作本身也会被记录。
+                </p>
+                <div id="canon_keeper_versions" class="canon-keeper-versions"></div>
             </div>
-
-            <small id="canon_keeper_status">
-                尚未保存
-            </small>
         </div>
     </div>
 </div>
