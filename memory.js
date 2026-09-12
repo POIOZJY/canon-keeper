@@ -344,3 +344,15 @@ export function parseModelJson(value) {
         return null;
     }
 }
+
+export function resolveContextLimit(ctx = {}) {
+    const chatCompletionLimit = Number(ctx.chatCompletionSettings?.openai_max_context);
+    const genericLimit = Number(ctx.maxContext);
+
+    // OpenAI-compatible Chat Completion providers (including DeepSeek) keep
+    // their context setting separately from the generic completion setting.
+    if (ctx.mainApi === 'openai' && Number.isFinite(chatCompletionLimit) && chatCompletionLimit > 0) {
+        return chatCompletionLimit;
+    }
+    return Number.isFinite(genericLimit) && genericLimit > 0 ? genericLimit : 0;
+}

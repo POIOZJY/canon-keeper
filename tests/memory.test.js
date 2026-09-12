@@ -8,6 +8,7 @@ import {
     materializeState,
     messageFingerprint,
     parseModelJson,
+    resolveContextLimit,
     validateTransaction,
 } from '../memory.js';
 import { buildInjectionPrompt, FINAL_COMPLIANCE_REMINDER } from '../prompts.js';
@@ -141,4 +142,18 @@ test('正文注入使用通用约束一致性规则', () => {
     assert.match(prompt, /这里是一条任意类型的长期设定/);
     assert.match(FINAL_COMPLIANCE_REMINDER, /全部已知约束相容/);
     assert.doesNotMatch(FINAL_COMPLIANCE_REMINDER, /丈夫|孩子|配偶|独居/);
+});
+
+test('Chat Completion 百分比使用独立的上下文上限', () => {
+    assert.equal(resolveContextLimit({
+        mainApi: 'openai',
+        maxContext: 7808,
+        chatCompletionSettings: { openai_max_context: 200000 },
+    }), 200000);
+
+    assert.equal(resolveContextLimit({
+        mainApi: 'textgenerationwebui',
+        maxContext: 32768,
+        chatCompletionSettings: { openai_max_context: 200000 },
+    }), 32768);
 });

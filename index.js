@@ -6,6 +6,7 @@ import {
     messageFingerprint,
     normalizeState,
     parseModelJson,
+    resolveContextLimit,
     validateTransaction,
 } from './memory.js';
 import {
@@ -99,8 +100,11 @@ async function updateTokenDisplay(effectiveText) {
     try {
         const ctx = context();
         const count = await ctx.getTokenCountAsync(effectiveText);
-        const ratio = ctx.maxContext ? count / ctx.maxContext : 0;
-        target.textContent = `实际注入：${count} tokens（上下文约 ${(ratio * 100).toFixed(1)}%）`;
+        const contextLimit = resolveContextLimit(ctx);
+        const ratio = contextLimit ? count / contextLimit : 0;
+        target.textContent = contextLimit
+            ? `实际注入：${count.toLocaleString()} tokens / 酒馆设置上限 ${contextLimit.toLocaleString()} tokens（约 ${(ratio * 100).toFixed(1)}%）`
+            : `实际注入：${count.toLocaleString()} tokens（未读取到上下文上限）`;
         target.classList.toggle('ck-warning', ratio > 0.3);
     } catch {
         target.textContent = `实际注入：约 ${effectiveText.length} 字符`;
@@ -360,6 +364,17 @@ async function bindUi() {
     const html = await ctx.renderExtensionTemplateAsync(MODULE_PATH, 'settings');
     document.querySelector('#extensions_settings2')?.insertAdjacentHTML('beforeend', html);
     uiReady = true;
+
+    // 酒馆为 Chat Completion 单独保存上下文上限。设置变化时立即刷新，
+    // 避免百分比停留在打开插件时的旧值。
+    const contextLimitSelectors = '#openai_max_context, #max_context, #max_context_length, #max_context_textgenerationwebui';
+    const refreshDisplayedTokenRatio = event => {
+        if (!(event.target instanceof Element) || !event.target.matches(contextLimitSelectors)) return;
+        const actualInjection = refreshInjection();
+        void updateTokenDisplay(actualInjection);
+    };
+    document.addEventListener('input', refreshDisplayedTokenRatio);
+    document.addEventListener('change', refreshDisplayedTokenRatio);
 
     document.querySelector('#ck_save')?.addEventListener('click', () => enqueue(async () => {
         const state = getState();
