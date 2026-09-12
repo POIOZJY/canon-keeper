@@ -137,10 +137,12 @@ test('同一轮存在无效操作时整轮拒绝', () => {
 
 test('正文注入使用通用约束一致性规则', () => {
     const prompt = buildInjectionPrompt('这里是一条任意类型的长期设定。');
-    assert.match(prompt, /一组同时成立的约束/);
-    assert.match(prompt, /显性或隐性的设定冲突/);
+    assert.match(prompt, /可同时成立的约束/);
+    assert.match(prompt, /每一句、每个分句及其限定信息/);
+    assert.match(prompt, /数字、否定词、程度词、范围词、时间词、条件词和例外/);
+    assert.match(prompt, /对草稿逐句复核/);
     assert.match(prompt, /这里是一条任意类型的长期设定/);
-    assert.match(FINAL_COMPLIANCE_REMINDER, /全部已知约束相容/);
+    assert.match(FINAL_COMPLIANCE_REMINDER, /重新对照 Canon Keeper 长期设定原文/);
     assert.doesNotMatch(FINAL_COMPLIANCE_REMINDER, /丈夫|孩子|配偶|独居/);
 });
 
