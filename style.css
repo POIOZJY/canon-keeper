@@ -1,175 +1,93 @@
-.canon-keeper-settings {
-    width: 100%;
-}
-
-.canon-keeper-settings .inline-drawer-content {
-    padding-bottom: 14px;
-}
-
-.canon-keeper-section {
-    width: 100%;
-    box-sizing: border-box;
-}
-
-.canon-keeper-section + .canon-keeper-section {
-    margin-top: 18px;
-}
-
-.canon-keeper-section h4 {
-    margin: 8px 0;
-}
-
-.canon-keeper-description {
-    margin: 4px 0 12px;
-    opacity: 0.82;
-    line-height: 1.5;
-}
-
-.canon-keeper-settings label {
-    display: block;
-    margin: 11px 0 5px;
-}
-
-.canon-keeper-settings textarea,
-.canon-keeper-settings input[type="text"],
-.canon-keeper-settings input[type="url"],
-.canon-keeper-settings input[type="number"],
-.canon-keeper-settings input[type="password"] {
-    display: block;
-    width: 100%;
-    min-width: 0;
-    box-sizing: border-box;
-}
-
-.canon-keeper-settings textarea {
-    resize: vertical;
-}
-
-.canon-keeper-panel {
-    padding-top: 12px;
-    border-top: 1px solid var(--SmartThemeBorderColor);
-}
-
-.canon-keeper-button {
-    display: block !important;
-    width: 100% !important;
-    min-width: 100% !important;
-    box-sizing: border-box;
-    margin: 12px 0 8px;
-    white-space: normal;
-}
-
-.canon-keeper-key-row {
+#canon_keeper_settings .ck-panel {
     display: flex;
-    gap: 7px;
-    align-items: stretch;
+    flex-direction: column;
+    gap: 10px;
 }
 
-.canon-keeper-key-row input {
-    flex: 1 1 auto;
+#canon_keeper_settings textarea {
+    width: 100%;
+    min-height: 260px;
+    resize: vertical;
+    line-height: 1.55;
 }
 
-.canon-keeper-small-button {
-    flex: 0 0 auto;
-    min-width: 58px;
-}
-
-.canon-keeper-check-row {
-    display: flex !important;
+#canon_keeper_settings .ck-row {
+    display: flex;
+    flex-wrap: wrap;
     align-items: center;
     gap: 8px;
 }
 
-.canon-keeper-check-row input {
-    width: auto !important;
-    margin: 0 !important;
+#canon_keeper_settings .ck-limit-row input {
+    width: 72px;
 }
 
-.canon-keeper-status,
-.canon-keeper-metric {
-    display: block;
-    margin-top: 7px;
-    line-height: 1.4;
-    opacity: 0.82;
+#canon_keeper_settings .ck-help,
+#canon_keeper_settings .ck-empty {
+    opacity: 0.75;
+    font-size: 0.9em;
 }
 
-.canon-keeper-risk,
-.canon-keeper-notice {
+#canon_keeper_settings .ck-notice {
     padding: 10px;
-    border: 1px solid var(--SmartThemeBorderColor);
+    border: 1px solid var(--SmartThemeQuoteColor);
     border-radius: 6px;
-    line-height: 1.5;
 }
 
-.canon-keeper-notice {
-    margin-top: 12px;
-    opacity: 0.86;
-}
-
-.canon-keeper-prompt-block {
-    margin-top: 12px;
-}
-
-.canon-keeper-prompt-block.is-hidden {
+#canon_keeper_settings .is-hidden {
     display: none;
 }
 
-.canon-keeper-versions {
-    max-height: 620px;
-    overflow-y: auto;
-    padding-right: 2px;
-}
-
-.canon-keeper-version {
-    margin: 10px 0;
-    padding: 10px;
-    border: 1px solid var(--SmartThemeBorderColor);
-    border-radius: 6px;
-    line-height: 1.45;
-}
-
-.canon-keeper-version-head {
+#canon_keeper_settings .ck-meta {
     display: flex;
-    gap: 8px;
     justify-content: space-between;
-    align-items: baseline;
-    margin-bottom: 5px;
+    gap: 12px;
+    padding: 8px 10px;
+    border-radius: 6px;
+    background: color-mix(in srgb, var(--SmartThemeBlurTintColor) 80%, transparent);
+    font-size: 0.9em;
 }
 
-.canon-keeper-version-head span,
-.canon-keeper-version small {
-    opacity: 0.76;
-    font-size: 0.86em;
+#canon_keeper_settings #ck_status[data-kind="busy"] {
+    color: var(--SmartThemeQuoteColor);
 }
 
-.canon-keeper-version ul {
+#canon_keeper_settings #ck_status[data-kind="ok"] {
+    color: #74c991;
+}
+
+#canon_keeper_settings #ck_status[data-kind="error"],
+#canon_keeper_settings .ck-warning {
+    color: #ff9b8f;
+}
+
+#canon_keeper_settings .ck-list {
+    display: flex;
+    flex-direction: column;
+    gap: 7px;
     margin: 8px 0;
-    padding-left: 20px;
+    max-height: 260px;
+    overflow: auto;
 }
 
-.canon-keeper-restore {
-    width: 100%;
-    box-sizing: border-box;
-    margin-top: 4px;
+#canon_keeper_settings .ck-fact,
+#canon_keeper_settings .ck-history-item {
+    padding: 8px 10px;
+    border-left: 3px solid var(--SmartThemeQuoteColor);
+    border-radius: 4px;
+    background: color-mix(in srgb, var(--SmartThemeBlurTintColor) 70%, transparent);
+    overflow-wrap: anywhere;
 }
 
-.canon-keeper-empty {
-    padding: 10px;
-    opacity: 0.72;
-    text-align: center;
+#canon_keeper_settings .ck-history-item.is-inactive {
+    opacity: 0.55;
+    border-left-color: currentColor;
 }
 
-.canon-keeper-status.is-error,
-.canon-keeper-risk.is-error {
-    color: var(--SmartThemeQuoteColor, #e26b6b);
+#canon_keeper_settings .ck-file-button {
+    cursor: pointer;
 }
 
-.canon-keeper-status.is-warning,
-.canon-keeper-risk.is-warning {
-    color: var(--SmartThemeEmColor, #d89a39);
-}
-
-.canon-keeper-status.is-success,
-.canon-keeper-risk.is-success {
-    color: var(--SmartThemeQuoteColor, #72ba78);
+#canon_keeper_settings .ck-file-button input {
+    display: none;
 }

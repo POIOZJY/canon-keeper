@@ -1,12 +1,10 @@
 {
-    "display_name": "Canon Keeper",
-    "loading_order": 100,
-    "requires": [],
-    "optional": [],
-    "js": "index.js",
-    "css": "style.css",
-    "author": "POIOZJY",
-    "version": "1.0.0",
-    "homePage": "https://github.com/POIOZJY/canon-keeper",
-    "auto_update": true
+  "display_name": "Canon Keeper 动态长期设定",
+  "loading_order": 10,
+  "js": "index.js",
+  "css": "style.css",
+  "author": "POIOZJY",
+  "version": "1.0.0",
+  "homePage": "https://github.com/POIOZJY/canon-keeper",
+  "auto_update": true
 }

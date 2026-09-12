@@ -1,0 +1,10 @@
+{
+  "name": "sillytavern-canon-keeper",
+  "version": "1.0.0",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "test": "node --test",
+    "check": "node --check index.js && node --check memory.js && node --check prompts.js"
+  }
+}
