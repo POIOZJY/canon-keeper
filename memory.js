@@ -301,6 +301,9 @@ export function validateTransaction({ state: stateInput, activeFingerprints, sou
 export function parseModelJson(value) {
     const text = String(value ?? '').trim();
     if (!text) return null;
+    if (/^(?:no[_\s-]?change|无(?:长期设定)?变化|没有(?:长期设定)?变化|无需修改|不需要修改)[。.!！]?$/i.test(text)) {
+        return { result: 'no_change', operations: [] };
+    }
     const unfenced = text
         .replace(/^```(?:json)?\s*/i, '')
         .replace(/\s*```$/i, '')
@@ -308,13 +311,36 @@ export function parseModelJson(value) {
     try {
         return JSON.parse(unfenced);
     } catch {
-        const start = unfenced.indexOf('{');
-        const end = unfenced.lastIndexOf('}');
-        if (start === -1 || end <= start) return null;
-        try {
-            return JSON.parse(unfenced.slice(start, end + 1));
-        } catch {
-            return null;
+        let depth = 0;
+        let start = -1;
+        let inString = false;
+        let escaped = false;
+        for (let index = 0; index < unfenced.length; index += 1) {
+            const char = unfenced[index];
+            if (inString) {
+                if (escaped) escaped = false;
+                else if (char === '\\') escaped = true;
+                else if (char === '"') inString = false;
+                continue;
+            }
+            if (char === '"') {
+                inString = true;
+                continue;
+            }
+            if (char === '{') {
+                if (depth === 0) start = index;
+                depth += 1;
+            } else if (char === '}' && depth > 0) {
+                depth -= 1;
+                if (depth === 0 && start !== -1) {
+                    try {
+                        return JSON.parse(unfenced.slice(start, index + 1));
+                    } catch {
+                        start = -1;
+                    }
+                }
+            }
         }
+        return null;
     }
 }

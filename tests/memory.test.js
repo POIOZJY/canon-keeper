@@ -10,6 +10,7 @@ import {
     parseModelJson,
     validateTransaction,
 } from '../memory.js';
+import { buildInjectionPrompt, FINAL_COMPLIANCE_REMINDER } from '../prompts.js';
 
 function assistant(mes, sendDate = '1') {
     return { mes, send_date: sendDate, name: '角色', is_user: false, is_system: false };
@@ -108,6 +109,14 @@ test('可解析代码围栏中的 JSON', () => {
     });
 });
 
+test('可安全识别简短的无变化结果和正文外 JSON', () => {
+    assert.deepEqual(parseModelJson('无需修改。'), { result: 'no_change', operations: [] });
+    assert.deepEqual(parseModelJson('检查完成：\n{"result":"no_change","operations":[]}\n谢谢'), {
+        result: 'no_change',
+        operations: [],
+    });
+});
+
 test('同一轮存在无效操作时整轮拒绝', () => {
     const state = createEmptyState();
     state.baselineText = '角色A是女的。';
@@ -123,4 +132,13 @@ test('同一轮存在无效操作时整轮拒绝', () => {
         ],
     });
     assert.equal(result.transaction, null);
+});
+
+test('正文注入使用通用约束一致性规则', () => {
+    const prompt = buildInjectionPrompt('这里是一条任意类型的长期设定。');
+    assert.match(prompt, /一组同时成立的约束/);
+    assert.match(prompt, /显性或隐性的设定冲突/);
+    assert.match(prompt, /这里是一条任意类型的长期设定/);
+    assert.match(FINAL_COMPLIANCE_REMINDER, /全部已知约束相容/);
+    assert.doesNotMatch(FINAL_COMPLIANCE_REMINDER, /丈夫|孩子|配偶|独居/);
 });

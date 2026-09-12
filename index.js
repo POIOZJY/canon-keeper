@@ -8,12 +8,19 @@ import {
     parseModelJson,
     validateTransaction,
 } from './memory.js';
-import { buildChangeDetectionPrompt, buildInjectionPrompt } from './prompts.js';
+import {
+    buildChangeDetectionPrompt,
+    buildInjectionPrompt,
+    CHANGE_DETECTION_SCHEMA,
+    FINAL_COMPLIANCE_REMINDER,
+} from './prompts.js';
 
 const MODULE_ID = 'canon_keeper';
 const MODULE_PATH = 'third-party/canon-keeper';
 const STATE_KEY = 'canon_keeper_state';
-const PROMPT_KEY = 'canon_keeper_main_memory';
+const MEMORY_PROMPT_KEY = 'canon_keeper_main_memory';
+const REMINDER_PROMPT_KEY = 'canon_keeper_final_compliance';
+const POSITION_IN_PROMPT = 0;
 const POSITION_IN_CHAT = 1;
 const ROLE_SYSTEM = 0;
 const INJECTION_DEPTH = 0;
@@ -22,6 +29,7 @@ let pendingAssistantIndex = null;
 let analysisRunning = false;
 let workQueue = Promise.resolve();
 let uiReady = false;
+const structuredOutputSupport = new Map();
 
 function context() {
     return SillyTavern.getContext();
@@ -58,9 +66,14 @@ function refreshInjection() {
     const ctx = context();
     const state = getState({ create: false });
     const effective = state ? formatEffectiveMemory(getMaterialized(state)) : '';
-    const prompt = state?.enabled && effective ? buildInjectionPrompt(effective) : '';
-    ctx.setExtensionPrompt(PROMPT_KEY, prompt, POSITION_IN_CHAT, INJECTION_DEPTH, false, ROLE_SYSTEM);
-    return effective;
+    const memoryPrompt = state?.enabled && effective ? buildInjectionPrompt(effective) : '';
+    const reminderPrompt = memoryPrompt ? FINAL_COMPLIANCE_REMINDER : '';
+
+    // 完整设定进入主提示区，覆盖对 system 消息位置处理不同的 API。
+    ctx.setExtensionPrompt(MEMORY_PROMPT_KEY, memoryPrompt, POSITION_IN_PROMPT, INJECTION_DEPTH, false, ROLE_SYSTEM);
+    // 简短核对规则放在聊天最末端，避免长设定导致开头指令失去注意力。
+    ctx.setExtensionPrompt(REMINDER_PROMPT_KEY, reminderPrompt, POSITION_IN_CHAT, INJECTION_DEPTH, false, ROLE_SYSTEM);
+    return memoryPrompt ? `${memoryPrompt}\n\n${reminderPrompt}` : '';
 }
 
 function setStatus(text, kind = 'idle') {
@@ -80,17 +93,17 @@ async function updateTokenDisplay(effectiveText) {
     const target = document.querySelector('#ck_tokens');
     if (!target) return;
     if (!effectiveText) {
-        target.textContent = '0 tokens';
+        target.textContent = '实际注入：0 tokens';
         return;
     }
     try {
         const ctx = context();
         const count = await ctx.getTokenCountAsync(effectiveText);
         const ratio = ctx.maxContext ? count / ctx.maxContext : 0;
-        target.textContent = `${count} tokens（上下文约 ${(ratio * 100).toFixed(1)}%）`;
+        target.textContent = `实际注入：${count} tokens（上下文约 ${(ratio * 100).toFixed(1)}%）`;
         target.classList.toggle('ck-warning', ratio > 0.3);
     } catch {
-        target.textContent = `约 ${effectiveText.length} 字符`;
+        target.textContent = `实际注入：约 ${effectiveText.length} 字符`;
     }
 }
 
@@ -112,20 +125,46 @@ function summarizeOperation(operation) {
     return `替换：${operation.old_text} → ${operation.new_text}`;
 }
 
+function analysisLabel(outcome) {
+    return {
+        changed: '已更新长期设定',
+        no_change: '没有长期变化',
+        rejected: '候选修改未通过校验',
+        error: '后台输出无法解析，设定未变',
+        request_error: '后台请求失败，设定未变',
+        baseline: '手动保存时已存在',
+        cleared: '已清空自动记录',
+    }[outcome] ?? '检查记录';
+}
+
 function renderHistory(state, materialized) {
     const container = document.querySelector('#ck_history');
     if (!container) return;
     const active = new Set(materialized.appliedTransactionIds);
-    if (!state.transactions.length) {
-        container.innerHTML = '<div class="ck-empty">暂无自动修改记录</div>';
+    const analyses = [...state.analyzed].reverse().slice(0, 50);
+    if (!analyses.length) {
+        container.innerHTML = '<div class="ck-empty">暂无后台检查记录</div>';
         return;
     }
-    container.innerHTML = [...state.transactions].reverse().map(transaction => {
-        const status = active.has(transaction.id) ? '生效中' : '已随消息撤回';
-        const lines = (transaction.operations ?? []).map(summarizeOperation).join('<br>');
-        return `<div class="ck-history-item ${active.has(transaction.id) ? 'is-active' : 'is-inactive'}">
-            <div><strong>${status}</strong> · 消息位置 ${Number(transaction.sourceIndex) + 1}</div>
-            <div>${escapeHtml(lines).replaceAll('&lt;br&gt;', '<br>')}</div>
+    container.innerHTML = analyses.map(analysis => {
+        const transaction = [...state.transactions].reverse()
+            .find(item => item.sourceFingerprint === analysis.fingerprint);
+        const isActive = transaction ? active.has(transaction.id) : true;
+        const operationText = transaction
+            ? (transaction.operations ?? []).map(summarizeOperation).map(escapeHtml).join('<br>')
+            : '';
+        const position = Number.isInteger(Number(analysis.sourceIndex))
+            ? ` · 消息位置 ${Number(analysis.sourceIndex) + 1}`
+            : '';
+        const note = analysis.note ? `<div class="ck-history-note">${escapeHtml(analysis.note)}</div>` : '';
+        const raw = analysis.rawOutput
+            ? `<details class="ck-raw"><summary>查看后台原始输出</summary><pre>${escapeHtml(analysis.rawOutput)}</pre></details>`
+            : '';
+        const lifecycle = transaction ? ` · ${isActive ? '生效中' : '已随消息撤回'}` : '';
+        return `<div class="ck-history-item ${isActive ? 'is-active' : 'is-inactive'}" data-outcome="${escapeHtml(analysis.outcome)}">
+            <div><strong>${escapeHtml(analysisLabel(analysis.outcome))}</strong>${position}${lifecycle}</div>
+            ${operationText ? `<div>${operationText}</div>` : ''}
+            ${note}${raw}
         </div>`;
     }).join('');
 }
@@ -141,6 +180,8 @@ async function renderState() {
         if (textarea) textarea.value = '';
         renderAdditions({ additions: [] });
         document.querySelector('#ck_history').innerHTML = '<div class="ck-empty">请先打开一个聊天</div>';
+        const preview = document.querySelector('#ck_prompt_preview');
+        if (preview) preview.textContent = '';
         updateTokenDisplay('');
         setStatus('未打开聊天');
         return;
@@ -154,8 +195,10 @@ async function renderState() {
     document.querySelector('#ck_addition_ratio').value = Math.round(state.additionRatio * 100);
     renderAdditions(materialized);
     renderHistory(state, materialized);
-    const effective = refreshInjection();
-    await updateTokenDisplay(effective);
+    const actualInjection = refreshInjection();
+    const preview = document.querySelector('#ck_prompt_preview');
+    if (preview) preview.textContent = actualInjection;
+    await updateTokenDisplay(actualInjection);
 }
 
 function enqueue(task) {
@@ -178,9 +221,62 @@ function alreadyAnalyzed(state, fingerprint) {
     return state.analyzed.some(item => item.fingerprint === fingerprint);
 }
 
-function recordAnalysis(state, fingerprint, outcome, note = '') {
-    state.analyzed.push({ fingerprint, outcome, note: String(note).slice(0, 300), at: Date.now() });
+function recordAnalysis(state, fingerprint, outcome, note = '', sourceIndex = null, rawOutput = '') {
+    state.analyzed.push({
+        fingerprint,
+        outcome,
+        note: String(note).slice(0, 500),
+        sourceIndex,
+        rawOutput: String(rawOutput ?? '').slice(0, 1500),
+        at: Date.now(),
+    });
     state.analyzed = state.analyzed.slice(-1000);
+}
+
+function isValidDecision(parsed) {
+    if (!parsed || !['no_change', 'changes'].includes(parsed.result) || !Array.isArray(parsed.operations)) return false;
+    if (parsed.result === 'no_change') return parsed.operations.length === 0;
+    return parsed.operations.length > 0;
+}
+
+function connectionKey(ctx) {
+    let model = '';
+    try {
+        model = ctx.getChatCompletionModel?.() ?? '';
+    } catch {
+        model = '';
+    }
+    return `${ctx.mainApi}:${model}`;
+}
+
+async function requestChangeDecision(ctx, quietPrompt) {
+    const baseOptions = {
+        quietPrompt,
+        skipWIAN: true,
+        responseLength: 700,
+        removeReasoning: true,
+    };
+    const key = connectionKey(ctx);
+    const mayUseSchema = ctx.mainApi === 'openai' && structuredOutputSupport.get(key) !== false;
+
+    if (mayUseSchema) {
+        try {
+            const raw = await ctx.generateQuietPrompt({ ...baseOptions, jsonSchema: CHANGE_DETECTION_SCHEMA });
+            const parsed = parseModelJson(raw);
+            if (isValidDecision(parsed)) {
+                structuredOutputSupport.set(key, true);
+                return { raw, parsed, usedFallback: false };
+            }
+            structuredOutputSupport.set(key, false);
+        } catch (error) {
+            console.warn(`[${MODULE_ID}] structured output unavailable; falling back`, error);
+            structuredOutputSupport.set(key, false);
+        }
+    }
+
+    const raw = await ctx.generateQuietPrompt(baseOptions);
+    const parsed = parseModelJson(raw);
+    return { raw, parsed: isValidDecision(parsed) ? parsed : null, usedFallback: mayUseSchema };
 }
 
 async function analyzeAssistantMessage(index, { force = false } = {}) {
@@ -204,22 +300,16 @@ async function analyzeAssistantMessage(index, { force = false } = {}) {
             userMessage: latestUserMessageBefore(index),
             assistantMessage: message.mes,
         });
-        const raw = await ctx.generateQuietPrompt({
-            quietPrompt,
-            skipWIAN: true,
-            responseLength: 700,
-            removeReasoning: true,
-        });
-        const parsed = parseModelJson(raw);
+        const { raw, parsed, usedFallback } = await requestChangeDecision(ctx, quietPrompt);
         if (!parsed) {
-            recordAnalysis(state, fingerprint, 'error', '后台返回的 JSON 无法解析');
+            recordAnalysis(state, fingerprint, 'error', '后台 AI 没有按规定返回有效结果', index, raw);
             await saveState(state);
-            setStatus('后台结果格式错误，本轮未修改', 'error');
+            setStatus('检查未完成：后台输出格式无效；设定没有变化', 'warning');
             return;
         }
 
-        if (parsed.result === 'no_change' || !Array.isArray(parsed.operations) || !parsed.operations.length) {
-            recordAnalysis(state, fingerprint, 'no_change');
+        if (parsed.result === 'no_change') {
+            recordAnalysis(state, fingerprint, 'no_change', usedFallback ? '已使用兼容模式解析' : '', index, raw);
             await saveState(state);
             setStatus('检查完成：没有长期设定变化', 'ok');
             return;
@@ -233,7 +323,7 @@ async function analyzeAssistantMessage(index, { force = false } = {}) {
             rawOperations: parsed.operations,
         });
         if (transaction) state.transactions.push(transaction);
-        recordAnalysis(state, fingerprint, transaction ? 'changed' : 'rejected', errors.join('；'));
+        recordAnalysis(state, fingerprint, transaction ? 'changed' : 'rejected', errors.join('；'), index, raw);
         await saveState(state);
         setStatus(transaction
             ? `已静默更新 ${transaction.operations.length} 项长期设定`
@@ -241,7 +331,9 @@ async function analyzeAssistantMessage(index, { force = false } = {}) {
         transaction ? 'ok' : 'error');
     } catch (error) {
         console.error(`[${MODULE_ID}] background analysis failed`, error);
-        setStatus(`后台检查失败，本轮未修改：${error.message}`, 'error');
+        recordAnalysis(state, fingerprint, 'request_error', error.message, index);
+        await saveState(state);
+        setStatus(`后台请求失败；设定没有变化：${error.message}`, 'warning');
     } finally {
         analysisRunning = false;
         await renderState();

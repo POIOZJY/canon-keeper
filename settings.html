@@ -22,10 +22,10 @@
 
             <label for="ck_memory_text"><strong>当前用户设定</strong></label>
             <textarea id="ck_memory_text" class="text_pole ck-requires-chat" rows="14" placeholder="在这里粘贴世界观、人物和长期设定……"></textarea>
-            <div class="ck-help">自动修改只做精确最小替换。手动点击保存会把当前文字设为新基准，并清空旧自动修改记录。</div>
+            <div class="ck-help">自动修改只做精确最小替换。手动保存会把当前文字设为新基准，并清空旧自动修改记录。</div>
 
             <div class="ck-row">
-                <button id="ck_save" class="menu_button ck-requires-chat">保存为新基准</button>
+                <button id="ck_save" class="menu_button ck-requires-chat">保存新基准（清历史）</button>
                 <button id="ck_retry" class="menu_button ck-requires-chat">重查最后回复</button>
                 <button id="ck_export" class="menu_button ck-requires-chat">导出备份</button>
                 <label class="menu_button ck-file-button ck-requires-chat">导入备份<input id="ck_import" type="file" accept="application/json,.json"></label>
@@ -38,9 +38,14 @@
             </div>
 
             <div class="ck-meta">
-                <span id="ck_tokens">0 tokens</span>
+                <span id="ck_tokens">实际注入：0 tokens</span>
                 <span id="ck_status" data-kind="idle">就绪</span>
             </div>
+
+            <details>
+                <summary><strong>查看本轮实际注入内容</strong></summary>
+                <pre id="ck_prompt_preview" class="ck-prompt-preview"></pre>
+            </details>
 
             <details>
                 <summary><strong>剧情确认的长期补充</strong></summary>
@@ -48,7 +53,7 @@
             </details>
 
             <details>
-                <summary><strong>自动修改与回滚记录</strong></summary>
+                <summary><strong>后台检查、修改与回滚记录</strong></summary>
                 <div id="ck_history" class="ck-list"></div>
                 <button id="ck_clear_auto" class="menu_button redWarningBG ck-requires-chat">清空所有自动记录</button>
             </details>

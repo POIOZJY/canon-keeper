@@ -1,12 +1,24 @@
+#canon_keeper_settings {
+    box-sizing: border-box;
+    grid-column: 1 / -1;
+    flex: 1 0 100%;
+    width: 100%;
+    min-width: 0;
+}
+
 #canon_keeper_settings .ck-panel {
     display: flex;
     flex-direction: column;
     gap: 10px;
+    box-sizing: border-box;
+    width: 100%;
+    min-width: 0;
 }
 
 #canon_keeper_settings textarea {
+    box-sizing: border-box;
     width: 100%;
-    min-height: 260px;
+    min-height: clamp(180px, 32vh, 360px);
     resize: vertical;
     line-height: 1.55;
 }
@@ -16,6 +28,23 @@
     flex-wrap: wrap;
     align-items: center;
     gap: 8px;
+}
+
+#canon_keeper_settings .ck-row > .menu_button {
+    box-sizing: border-box;
+    flex: 1 1 150px;
+    width: auto;
+    min-width: 120px;
+    max-width: none;
+    min-height: 38px;
+    writing-mode: horizontal-tb !important;
+    text-orientation: mixed !important;
+    white-space: nowrap !important;
+    word-break: keep-all !important;
+    overflow-wrap: normal !important;
+    line-height: 1.25 !important;
+    text-align: center;
+    justify-content: center;
 }
 
 #canon_keeper_settings .ck-limit-row input {
@@ -61,6 +90,10 @@
     color: #ff9b8f;
 }
 
+#canon_keeper_settings #ck_status[data-kind="warning"] {
+    color: #f1bf68;
+}
+
 #canon_keeper_settings .ck-list {
     display: flex;
     flex-direction: column;
@@ -90,4 +123,52 @@
 
 #canon_keeper_settings .ck-file-button input {
     display: none;
+}
+
+#canon_keeper_settings .ck-prompt-preview,
+#canon_keeper_settings .ck-raw pre {
+    box-sizing: border-box;
+    width: 100%;
+    max-height: 280px;
+    margin: 8px 0;
+    padding: 10px;
+    overflow: auto;
+    white-space: pre-wrap;
+    overflow-wrap: anywhere;
+    border: 1px solid color-mix(in srgb, currentColor 25%, transparent);
+    border-radius: 6px;
+    font-size: 0.88em;
+    line-height: 1.45;
+}
+
+#canon_keeper_settings .ck-history-note {
+    margin-top: 4px;
+    opacity: 0.8;
+}
+
+#canon_keeper_settings .ck-raw summary {
+    margin-top: 6px;
+    cursor: pointer;
+    opacity: 0.8;
+}
+
+#canon_keeper_settings #ck_clear_auto {
+    display: inline-flex;
+    width: auto;
+    min-width: 150px;
+    writing-mode: horizontal-tb !important;
+    white-space: nowrap !important;
+    word-break: keep-all !important;
+}
+
+@media (max-width: 700px) {
+    #canon_keeper_settings .ck-row > .menu_button {
+        flex-basis: calc(50% - 8px);
+        min-width: 0;
+        white-space: normal !important;
+    }
+
+    #canon_keeper_settings .ck-meta {
+        flex-direction: column;
+    }
 }
